@@ -9,6 +9,7 @@ AD팀의 이슈 및 코멘트에 대한 인원별 자동 체크 기능
  - Gitlab Comment Check by Issue
  - Creat Data Frame
  - Daily Mailing
+ - 참고 사이트
 
 ### 1. Get Gitlab API Token
 ![gitlab Token](assets/markdown-img-paste-20180911164124296.png)
@@ -193,3 +194,6 @@ send.mail(from = [From Email],
 
 - Daily Mail
 ![Daily Mail](assets/markdown-img-paste-20180913174630618.png)
+
+### 6. 참고 사이트
+https://developer.github.com/v3/

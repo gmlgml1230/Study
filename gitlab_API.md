@@ -7,7 +7,7 @@ AD팀의 이슈 및 코멘트에 대한 인원별 자동 체크 기능
  - Get Gitlab API Token
  - Gitlab Issue Check by Project
  - Gitlab Comment Check by Issue
- - Creat Data Frame
+ - Create Data Frame
  - Daily Mailing
  - 참고 사이트
 
@@ -64,7 +64,7 @@ git_notes <- fromJSON(read_html(git_notes) %>% html_text())
 ```
 ![R](assets/markdown-img-paste-20180911174523703.png)
 
-### 4. Creat Data Frame(R)
+### 4. Create Data Frame(R)
 ```
 # =========================================================================
 # gitlab API

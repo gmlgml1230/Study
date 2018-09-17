@@ -196,4 +196,4 @@ send.mail(from = [From Email],
 ![Daily Mail](assets/markdown-img-paste-20180913174630618.png)
 
 ### 6. 참고 사이트
-https://developer.github.com/v3/
+https://docs.gitlab.com/ee/api/README.html

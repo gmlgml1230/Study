@@ -124,7 +124,8 @@ server <- function(input, output) {
   callModule(shiny_module$shiny_module_server.func, "text1", "안녕하세요")
   callModule(shiny_module$shiny_module_server.func, "text2", "모두들")
   callModule(shiny_module$shiny_module_server.func, "text3", "행복하세요")
-}```
+}
+```
 
 ###R Shiny Module 심화 예제
 - Module Function

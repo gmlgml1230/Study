@@ -71,6 +71,64 @@ DB$db.append
 ###R Shiny Module
 - Module Function
 ```
+library(modules)
+
+shiny_module <-modules::module({
+  import("shiny")
+  
+  # UI Function
+  shiny_module.func <- function(id.chr){
+    ns <- NS(id.chr)
+    
+    tagList(
+      actionButton(ns("ok"), "OK"),
+      verbatimTextOutput(ns("text"))
+    )
+  }
+  
+  
+  # Server Function
+  shiny_module_server.func <- function(input, output, session, ans){
+    observeEvent(input$ok, {
+      output$text <- renderText({ans})
+    })
+  }
+})
+```
+
+- UI function
+```
+source("~/ex_shiny/shiny_module.R")
+
+ui <- fluidPage(
+  titlePanel("Tabsets"),
+  sidebarLayout(
+    sidebarPanel(
+    ),
+    mainPanel(
+      tabsetPanel(
+        tabPanel("text1", shiny_module$shiny_module.func("text1")),
+        tabPanel("text2", shiny_module$shiny_module.func("text2")),
+        tabPanel("text3", shiny_module$shiny_module.func("text3"))
+      )
+    )
+  )
+)
+```
+
+- Server function
+```
+source("~/ex_shiny/shiny_module.R")
+
+server <- function(input, output) {
+  callModule(shiny_module$shiny_module_server.func, "text1", "안녕하세요")
+  callModule(shiny_module$shiny_module_server.func, "text2", "모두들")
+  callModule(shiny_module$shiny_module_server.func, "text3", "행복하세요")
+}```
+
+###R Shiny Module 심화 예제
+- Module Function
+```
 library(shiny)
 library(shinyWidgets)
 
@@ -92,7 +150,7 @@ report_info_ui.func <- function(id.chr,campaign_list.vec,reportlistorder.vec,rep
                        selectInput(inputId = ns("reportdimension"), label = "Select Dimension", choices = reportdimension.vec, multiple = TRUE),
                        selectInput(inputId = ns("reportmetric"), label = "Select Metric", choices = reportmetric.vec, multiple = TRUE),
                        selectInput(inputId = ns("reportorder"), label = "Select OrderBy", choices = reportlistorder.vec),
-                       actionButton(inputId = ns("reportdb"), label = "Submit"),
+                       actionButton(inputId = ns( "reportdb"), label = "Submit"),
                        verbatimTextOutput(ns("test"))
                      )
     )

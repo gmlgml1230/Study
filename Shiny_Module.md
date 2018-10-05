@@ -1,10 +1,10 @@
-#Shiny Module
+# Shiny Module
 
-###개요
+### 개요
 RDMA의 UI, Server Code는 총 923줄로 이뤄져있으며, 총 4개의 탭이 존재 합니다.
-각 탭마다 같은 기능을하고있는 부분이 존재하며 해당 기능의 코드를 각 탭에 추가하는 식으로 작성되어있습니다. 그렇기에 코드를 가독성이 좋지 않으므로 이를 해결하기위해 Shiny Module를 사용하게되었습니다.
+각 탭마다 같은 기능을하고있는 부분이 존재하며 해당 기능의 코드를 각 탭에 추가하는 식으로 작성되어있습니다. 그렇기에 코드의 가독성이 좋지 않으므로 이를 해결하기위해 Shiny Module를 사용하게되었습니다.
 
-###R Module
+### R Module
 Shiny Module에 앞서 R의 함수를 Module로 만드는 작업
 ```
 library(modules)
@@ -68,25 +68,39 @@ DB$db.overwrite
 DB$db.append
 ```
 
-###R Shiny Module
+<br>
+
+- 기존 사용자 함수
+![기존스크립트](assets/markdown-img-paste-20181005095641855.png)
+<br>
+
+- 모듈 사용 후 사용자 함수
+![모듈스크립트](assets/markdown-img-paste-20181005095836404.png)
+### R Shiny Module
+- 모듈을 사용하지 않았을 때
+![RDMA](assets/markdown-img-paste-20181005100417862.png)
+>만든 저조차도 어떤 것이 무슨 기능을하는지 찾기가 쉽지 않습니다. 제 코드를 한참 본 후 무슨 기능을 하기위해 만들었는지 떠올리게 됩니다. 하물며 제가 아닌 다른사람이 제 코드를 볼 때 이해하기 쉽지 않을 것이라 생각 됩니다.
+
+<br>
+
 - Module Function
 ```
 library(modules)
 
 shiny_module <-modules::module({
   import("shiny")
-  
+
   # UI Function
   shiny_module.func <- function(id.chr){
     ns <- NS(id.chr)
-    
+
     tagList(
       actionButton(ns("ok"), "OK"),
       verbatimTextOutput(ns("text"))
     )
   }
-  
-  
+
+
   # Server Function
   shiny_module_server.func <- function(input, output, session, ans){
     observeEvent(input$ok, {
@@ -95,6 +109,10 @@ shiny_module <-modules::module({
   }
 })
 ```
+> Shiny Module에서 가장 중요한 것은 NS Function으로 ID의 네임 스페이스를 지정해야합니다.
+> 또한, Module안에는 tagList()에 여러 요소를 래핑시켜야합니다.
+
+<br>
 
 - UI function
 ```
@@ -116,6 +134,8 @@ ui <- fluidPage(
 )
 ```
 
+<br>
+
 - Server function
 ```
 source("~/ex_shiny/shiny_module.R")
@@ -126,8 +146,12 @@ server <- function(input, output) {
   callModule(shiny_module$shiny_module_server.func, "text3", "행복하세요")
 }
 ```
+>Server에 Module Function을 사용할 땐 callModule Function이 필요합니다.
+>callModule의 인수는 callModule(모듈 서버 함수, ID, 추가 인수)
 
-###R Shiny Module 심화 예제
+<br>
+
+### R Shiny Module 심화 예제
 - Module Function
 ```
 library(shiny)
@@ -139,59 +163,87 @@ source("[DB Script path]")
 # UI
 # ==============================================================
 
-report_info_ui.func <- function(id.chr,campaign_list.vec,reportlistorder.vec,reportmetric.vec,reportdimension.vec){
+report_info_ui.func <- function(id.chr,reportlistorder.vec,reportmetric.vec,reportdimension.vec,campaign_list.vec = NULL){
   ns <- NS(id.chr)
 
-  tagList(
-    shinyWidgets::materialSwitch(ns("reportinfo"), "Report Info", status = "info"),
-    conditionalPanel(condition = paste0("input['", ns("reportinfo"), "'] == true"),
-                     wellPanel(
-                       selectInput(inputId = ns("campaignlist"), label = "Campaign Name", choices = campaign_list.vec),
-                       textInput(inputId = ns("reportname"), label = "Report Name", value = ""),
-                       selectInput(inputId = ns("reportdimension"), label = "Select Dimension", choices = reportdimension.vec, multiple = TRUE),
-                       selectInput(inputId = ns("reportmetric"), label = "Select Metric", choices = reportmetric.vec, multiple = TRUE),
-                       selectInput(inputId = ns("reportorder"), label = "Select OrderBy", choices = reportlistorder.vec),
-                       actionButton(inputId = ns( "reportdb"), label = "Submit"),
-                       verbatimTextOutput(ns("test"))
-                     )
+  if(is.null(campaign_list.vec)){
+    tagList(
+      shinyWidgets::materialSwitch(ns("reportinfo"), "Report Info", status = "info"),
+      conditionalPanel(condition = paste0("input['", ns("reportinfo"), "'] == true"),
+                       wellPanel(
+                         selectInput(inputId = ns("reportdimension"), label = "Select Dimension", choices = reportdimension.vec, multiple = TRUE),
+                         selectInput(inputId = ns("reportmetric"), label = "Select Metric", choices = reportmetric.vec, multiple = TRUE),
+                         selectInput(inputId = ns("reportorder"), label = "Select OrderBy", choices = reportlistorder.vec),
+                         actionButton(inputId = ns("reportdb"), label = "Submit"),
+                         verbatimTextOutput(ns("test"))
+                       )
+      )
     )
-  )
+  } else {
+    tagList(
+      shinyWidgets::materialSwitch(ns("reportinfo"), "Report Info", status = "info"),
+      conditionalPanel(condition = paste0("input['", ns("reportinfo"), "'] == true"),
+                       wellPanel(
+                         selectInput(inputId = ns("campaignlist"), label = "Campaign Name", choices = campaign_list.vec),
+                         selectInput(inputId = ns("reportdimension"), label = "Select Dimension", choices = reportdimension.vec, multiple = TRUE),
+                         selectInput(inputId = ns("reportmetric"), label = "Select Metric", choices = reportmetric.vec, multiple = TRUE),
+                         selectInput(inputId = ns("reportorder"), label = "Select OrderBy", choices = reportlistorder.vec),
+                         actionButton(inputId = ns("reportdb"), label = "Submit"),
+                         verbatimTextOutput(ns("test"))
+                       )
+      )
+    )
+  }
 }
-
 
 
 # ==============================================================
 # Server
 # ==============================================================
 
-report_info_server.func <- function(input, output, session, campaign_name.chr, reportname){
+report_info_server.func <- function(input, output, session, campaign_name.chr, reportname.chr){
   str.func <- function(text.chr){
     return(strsplit(text.chr, ",") %>% unlist())
   }
-  report_info.df <- DB$db.select(paste0(campaign_name.chr, "_report_setting kia_report_setting where reportname = '", reportname, "'"))
-  updateSelectInput(session, inputId = "campaignlist", selected = report_info.df$campaign)
-  updateTextInput(session, inputId = "reportname", value = report_info.df$reportname)
-  updateSelectInput(session, inputId = "reportdimension", selected = str.func(report_info.df$dimension))
-  updateSelectInput(session, inputId = "reportmetric", selected = str.func(report_info.df$metric))
-  updateSelectInput(session, inputId = "reportorder", selected = str.func(report_info.df$orderby))
+  if(campaign_name.chr == "kia"){
+    report_info.df <- DB$db.select(paste0(campaign_name.chr, "_report_setting where reportname = '", reportname.chr, "'"))
+    updateSelectInput(session, inputId = "campaignlist", selected = report_info.df$campaign)
+    updateSelectInput(session, inputId = "reportdimension", selected = str.func(report_info.df$dimension))
+    updateSelectInput(session, inputId = "reportmetric", selected = str.func(report_info.df$metric))
+    updateSelectInput(session, inputId = "reportorder", selected = str.func(report_info.df$orderby))
+  } else {
+    report_info.df <- DB$db.select(paste0(campaign_name.chr, "_report_setting where reportname = '", reportname.chr, "'"))
+    updateSelectInput(session, inputId = "reportdimension", selected = str.func(report_info.df$dimension))
+    updateSelectInput(session, inputId = "reportmetric", selected = str.func(report_info.df$metric))
+    updateSelectInput(session, inputId = "reportorder", selected = str.func(report_info.df$orderby))
+  }
 }
 
-report_info_modi_server.func <- function(input, output, session, func, func2, func3, func4, func5){
-  observeEvent(input$reportdb, {
-    campaign <- input$campaignlist
-    reportname <- input$reportname
-    dimension <- func(input$reportdimension)
-    metric2 <- func2(input$reportmetric)
-    metric <- func3(input$reportmetric)
-    query <- func4(dimension, metric2, campaign)
-    orderby <- input$reportorder
-    settingdata <- data.frame(campaign, reportname, dimension, metric, orderby, query)
-    # output$test <- renderText({c(campaign, reportname, dimension, metric, orderby, query)})
-    func5("kia_report_setting", settingdata)
-    # updateSelectInput(session, inputId = "reportlist", choices = reportlistupdate.func()$reportname)
-    showModal(modalDialog(title = "Important message", "Report 생성 완료!"))
-
-  })
+report_info_modi_server.func <- function(input, output, session, reportname.chr, campaign_name.chr, func, func2, func3, func4, func5, func6){
+  if(campaign_name.chr == "kia"){
+    observeEvent(input$reportdb, {
+      campaign <- input$campaignlist
+      dimension <- func(input$reportdimension)
+      metric2 <- func2(input$reportmetric)
+      metric <- func3(input$reportmetric)
+      query <- func4(dimension, metric2, campaign)
+      orderby <- input$reportorder
+      func5(paste0("update ",campaign_name.chr,"_report_setting set campaign = '", campaign, "', dimension='", dimension, "', metric='", metric, "', orderby='", orderby, "', query='", query, "' where reportname='", reportname.chr, "'"))
+      updateSelectInput(session, inputId = "reportlist", choices = func6()$reportname)
+      showModal(modalDialog(title = "Important message", "Report 수정 완료!"))
+    })
+  } else {
+    observeEvent(input$reportdb, {
+      dimension <- func(input$reportdimension)
+      metric2 <- func2(input$reportmetric)
+      metric <- func3(input$reportmetric)
+      query <- func4(dimension, metric2)
+      orderby <- input$reportorder
+      func5(paste0("update ",campaign_name.chr,"_report_setting set dimension='", dimension, "', metric='", metric, "', orderby='", orderby, "', query='", query, "' where reportname='", reportname.chr, "'"))
+      updateSelectInput(session, inputId = "reportlist", choices = func6()$reportname)
+      showModal(modalDialog(title = "Important message", "Report 수정 완료!"))
+    })
+  }
 }
 ```
 - UI function
@@ -201,5 +253,7 @@ report_info_ui.func("report_info", campaign_list, reportorderlist, reportmetricl
 
 - Server function
 ```
-callModule(report_info_server.func, "report_info", "kia", input$reportlist)
+callModule(report_info_modi_server.func, "report_info", input$reportlist, "kia", textdimension.func, textmetric1.func, textmetric2.func, reportquery.func, MySQL_Send.func, reportlistupdate.func)
 ```
+-
+![Report Function](assets/markdown-img-paste-20181005113722471.png)
